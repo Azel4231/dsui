@@ -18,6 +18,8 @@
 
 (def homo '({:a 1 :b 2} {:a "1" :b "2"} {:a 1/3 :b 3/7}))
 (def inhomo  [{:a 1} {:b 2}])
+(def inhomo2  [{:a 1} {:b 2}])
 (deftest homo-test
-  (is (homogenous? homo)
-      (not (homogenous? inhomo))))
+  (is (= true (homogenous? homo)
+         (not (homogenous? inhomo))
+         (not (homogenous? inhomo2)))))

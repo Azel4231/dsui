@@ -49,15 +49,15 @@
 
 (defmulti create (fn [kw ds] kw))
 
-(defmethod create ::named-tabsheet [this ds] (let [tpane (new JTabbedPane)]
-    (->> ds
-         (map #(.addTab tpane (key %) (label (val %))) )
-         doall)))
+(defmethod create ::named-tabsheet [this ds]
+  (let [tpane (new JTabbedPane)]
+    (doseq [[k v] ds]
+      (.addTab tpane k (apply create v)))
+    tpane))
 
 (defmethod create ::form [this ds]
   (let [p (panel)]
-    (->> ds
-         (mapcat (fn [[kw childDs]] [(label kw) (apply create childDs)]))
+    (->> (for [[kw childDs] ds] [(label kw) (apply create childDs)])
          (add p))
     p))
 
@@ -113,13 +113,14 @@
                          :spirit 0
                          :time 0}
                 :rotes #{}
-                :waepons #{}
+                :weapons #{}
                 :experience-total 0
                 :experience-current 0}
    :ledger {:bashing 0
             :lethal 0
             :aggravated 0
             :mana 5
+            :size-base 5
             :size-current 5
             :armor {:bashing 0
                     :lethal 0

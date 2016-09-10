@@ -1,6 +1,8 @@
 (ns dsui.core
   (:require [clojure.spec :as s])
-  (:import [javax.swing JComponent JFrame JLabel JPanel JTextField JRadioButton JTabbedPane JCheckBox JComboBox JScrollPane SpringLayout]
+  (:import [java.util Vector Collection]
+           [javax.swing JComponent JFrame JLabel JPanel JTextField JTabbedPane JTable]
+           [javax.swing.table DefaultTableModel]
            [java.awt.event KeyAdapter WindowAdapter]
            [java.awt GridLayout]))
 
@@ -13,130 +15,72 @@
        (every? #(= (keys %) (keys (first coll))) coll)))
 (defn primitive-map? [m]
   (every? primitive? (vals m)))
-
 (s/def ::dsui-spec (s/or ::table ::tbl-spec ::named-tabsheet ::named-ts-spec ::indexed-tabsheet ::indexed-ts-spec ::form ::form-spec))
 (s/def ::tbl-spec (s/and (s/coll-of map?) (s/every primitive-map?) homogenous?))
 (s/def ::named-ts-spec (s/map-of any? ::dsui-spec))
 (s/def ::indexed-ts-spec (s/coll-of ::dsui-spec))
 (s/def ::form-spec (s/map-of any? (s/or ::field primitive? ::nested-ui ::dsui-spec)))
 
-
-; Todo Map with settings.
-(defn ^JFrame frame [close-f]
+(defn ^JFrame frame [title close-f]
   (doto (new JFrame)
-    (.pack)
     (.setSize (new java.awt.Dimension 400 700))
     (.addWindowListener (proxy [WindowAdapter] [] (windowClosing [e] close-f)))
+    (.setTitle title)
     (.setVisible true)))
-
 (defn add [^JComponent component & children]
-  (doseq [c (flatten children)] (.add component c)))
-
+  (doseq [^JComponent c (flatten children)] (.add component c)))
 (defn panel []
   (doto (new JPanel)
+    ; Gridlayout for a start
     (.setLayout (new GridLayout 0 6 2 2))))
-
 (defn field [value]
   (doto (new JTextField (str value))
     (.setEditable false)))
-
 (defn label [l]
   (new JLabel (str l)))
-
-(defn setup-frame [title]
-  (doto (frame #(print "Exiting..."))
-    (.setTitle title)))
+(defn table [tm]
+  (new JTable tm))
+(defn keys-to-v [ms]
+  (let [^Collection k (->> ms first keys vec)]
+    (new Vector keystrs)))
+(defn vals-to-vofv [ms]
+  (let [rows (->> ms (map vals) (map vec))
+        ^Collection vs (->> rows (map (fn [^Collection v] (new Vector v))) vec)]
+    (new Vector vs)))
+(defn table-model [ms]
+  (let [^Vector colnames (keys-to-v ms)
+        ^Vector content (vals-to-vofv ms)]
+    (new DefaultTableModel content colnames)))
 
 (defmulti create (fn [kw ds] kw))
-
-(defmethod create ::named-tabsheet [this ds]
+(defmethod create ::named-tabsheet [_ ds]
   (let [tpane (new JTabbedPane)]
     (doseq [[k v] ds]
-      (.addTab tpane k (apply create v)))
+      (.addTab tpane (str k) (apply create v)))
     tpane))
-
-(defmethod create ::form [this ds]
+(defmethod create ::indexed-tabsheet [_ ds]
+  (let [tpane (new JTabbedPane)]
+    (->> ds
+         (map-indexed (fn [i v] (.addTab tpane (str i) (apply create v))))
+         doall)
+    tpane))
+(defmethod create ::form [_ ds]
   (let [p (panel)]
-    (->> (for [[kw childDs] ds] [(label kw) (apply create childDs)])
-         (add p))
+    (add p (for [[kw childDs] ds] [(label kw) (apply create childDs)]))
     p))
-
-(defmethod create ::field [this ds]
+(defmethod create ::table [_ ds]
+  (table (table-model ds)))
+(defmethod create ::field [_ ds]
   (field ds))
+(defmethod create ::nested-ui [_ ds]
+  (apply create ds))
 
-(defmethod create ::nested-ui [this [kw v]]
-  (create kw v))
-
+(defn ^JFrame setup-frame []
+  (frame "DS-UI" #(print "Exiting...")))
 (defn dsui
-  "Creates a (write-only) Swing UI for a nested data structure."
+  "Creates a (write-only) Swing UI for an arbitrary nested data structure."
   [ds]
-  (let [^JFrame fr (setup-frame "DS UI")
-        [kw v] (s/conform ::dsui-spec ds)]
-    (.setContentPane fr (create kw v))))
+  (let [[kw v] (s/conform ::dsui-spec ds)]
+    (.setContentPane (setup-frame) (create kw v))))
 
-
-
-(def a {:t [{:a 1 :b 2} {:a "x" :b "y"}] :b {:some "other stuff"}})
-(def b [a {:c 23 :d 42}])
-(def c {:a [{:list "of stuff"}] :b 3})
-(def ts {:a 1 :b "2" :c 42 :d 23 :? "argh"})
-(def mage {:id (. java.util.UUID randomUUID)
-   :name name
-   :player ""
-   :chronicle ""
-   :concept ""
-   :virtue ""
-   :vice ""
-   :size-natural 5
-   :properties {:path :obrimos
-                :order :mysterium
-                :cabal ""
-                :gnosis 1
-                :willpower 1
-                :wisdom 7
-                :merits #{}
-                :flaws #{}
-                :attributes {:strength 1 :dexterity 5 :stamina 1,
-                             :intelligence 1 :wits 1 :resolve 1,
-                             :presence 1 :manipulation 1 :composure 1}
-                :skills {:academics 0 :computer 0 :crafts 0 :investigation 0 :medicine 0 :occult 0 :politics 0 :science 0,
-                         :athletics 0 :brawl 0 :drive 0 :firearms 0 :larceny 0 :stealth 0 :survival 0 :weaponry 0,
-                         :animalKen 0 :empathy 0 :expression 0 :intimidation 0 :persuasion 0 :socialize 0 :streetwise 0 :subterfuge 0}
-                :arcana {:death 0
-                         :fate 0
-                         :forces 0
-                         :life 0
-                         :matter 0
-                         :mind 0
-                         :prime 0
-                         :space 0
-                         :spirit 0
-                         :time 0}
-                :rotes #{}
-                :weapons #{}
-                :experience-total 0
-                :experience-current 0}
-   :ledger {:bashing 0
-            :lethal 0
-            :aggravated 0
-            :mana 5
-            :size-base 5
-            :size-current 5
-            :armor {:bashing 0
-                    :lethal 0
-                    :aggravated 0}
-            :spells-active 0
-            :spells-cast-upon-self 0
-            :spells-protective 0
-            :nimbus :none
-            :paradox-marks :none}
-   :historicProperties []})
-
-
-(dsui ts)
-
-; primitives currently not supported
-#_(dsui "2")
-
-(s/conform ::dsui-spec ts)
 

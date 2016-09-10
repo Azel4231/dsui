@@ -20,6 +20,21 @@
 (def inhomo  [{:a 1} {:b 2}])
 (def inhomo2  [{:a 1} {:b 2}])
 (deftest homo-test
-  (is (= true (homogenous? homo)
-         (not (homogenous? inhomo))
-         (not (homogenous? inhomo2)))))
+  (is (homogenous? homo))
+  (is (not (homogenous? inhomo)))
+  (is (not (homogenous? inhomo2))))
+
+
+
+(def ms [{:a 1 :b 2 :c 3}
+         {:a "1" :b 4/2 :c 3.0}
+         {:a :A :b nil :c "idk?"}])
+(deftest keys-to-v-test
+  (is (= 3 (count (keys-to-v ms))))
+  (is (= [:a :b :c] (keys-to-v ms))))
+
+(deftest vals-to-vofv-test
+  (is (= 3 (count (vals-to-vofv ms))))
+  (is (= [[1 2 3]
+          ["1" 2 3.0]
+          [:A nil "idk?"]] (vals-to-vofv ms))))

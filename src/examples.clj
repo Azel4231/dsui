@@ -1,9 +1,9 @@
 (ns dsui.examples
-  (:use [dsui.core]))
+  (:use [dsui.core])
+  (:require [clojure.spec :as s]))
 
 
-(def tbl [{:surname "John" :lastname "Doe" :occupation "Dentist"}
-          {:surname "Jane" :lastname "Doe" :occupation "unknown"}
+(def tbl [{:surname "Jane" :lastname "Doe" :occupation "unknown"}
           {:surname "Jimmy" :lastname "McNulty" :occupation "Criminal Investigator"}
           {:surname "Bunk" :lastname "Moreland" :occupation "Criminal Investigator"}
           {:surname "Omar" :lastname "Little" :occupation "?"}
@@ -66,6 +66,8 @@
 
 
 (dsui a)
+
+(s/conform ::dsui.core/dsui-spec tbl)
 
 ; primitives currently not supported
 #_(dsui "2")

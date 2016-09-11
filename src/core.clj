@@ -41,8 +41,8 @@
 (defn table [tm]
   (new JTable tm))
 (defn keys-to-v [ms]
-  (let [^Collection k (->> ms first keys vec)]
-    (new Vector keystrs)))
+  (let [^Collection ks (->> ms first keys vec)]
+    (new Vector ks)))
 (defn vals-to-vofv [ms]
   (let [rows (->> ms (map vals) (map vec))
         ^Collection vs (->> rows (map (fn [^Collection v] (new Vector v))) vec)]

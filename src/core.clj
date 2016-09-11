@@ -52,35 +52,35 @@
         ^Vector content (vals-to-vofv ms)]
     (new DefaultTableModel content colnames)))
 
-(defmulti create (fn [kw ds] kw))
-(defmethod create ::named-tabsheet [_ ds]
+(defmulti create first)
+(defmethod create ::named-tabsheet [[_ ds]]
   (let [tpane (new JTabbedPane)]
     (doseq [[k v] ds]
-      (.addTab tpane (str k) (apply create v)))
+      (.addTab tpane (str k) (create v)))
     tpane))
-(defmethod create ::indexed-tabsheet [_ ds]
+(defmethod create ::indexed-tabsheet [[_ ds]]
   (let [tpane (new JTabbedPane)]
     (->> ds
-         (map-indexed (fn [i v] (.addTab tpane (str i) (apply create v))))
+         (map-indexed (fn [i v] (.addTab tpane (str i) (create v))))
          doall)
     tpane))
-(defmethod create ::form [_ ds]
+(defmethod create ::form [[_ ds]]
   (let [p (panel)]
-    (add p (for [[kw childDs] ds] [(label kw) (apply create childDs)]))
+    (add p (for [[kw childDs] ds] [(label kw) (create childDs)]))
     p))
-(defmethod create ::table [_ ds]
+(defmethod create ::table [[_ ds]]
   (table (table-model ds)))
-(defmethod create ::field [_ ds]
+(defmethod create ::field [[_ ds]]
   (field ds))
-(defmethod create ::nested-ui [_ ds]
-  (apply create ds))
+(defmethod create ::nested-ui [[_ ds]]
+  (create ds))
 
 (defn ^JFrame setup-frame []
   (frame "DS-UI" #(print "Exiting...")))
 (defn dsui
   "Creates a (write-only) Swing UI for an arbitrary nested data structure."
   [ds]
-  (let [[kw v] (s/conform ::dsui-spec ds)]
-    (.setContentPane (setup-frame) (create kw v))))
+  (let [conformed (s/conform ::dsui-spec ds)]
+    (.setContentPane (setup-frame) (create conformed))))
 
 

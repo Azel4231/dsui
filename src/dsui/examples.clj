@@ -8,10 +8,6 @@
           {:surname "Bunk" :lastname "Moreland" :occupation "Criminal Investigator"}
           {:surname "Omar" :lastname "Little" :occupation "?"}
           ])
-(def a {:t [{:a 1 :b 2} {:a "x" :b "y"}] :b {:some "other stuff"} :x tbl})
-(def b [a {:c 23 :d 42}])
-(def c {:a [{:list "of stuff"}] :b 3})
-(def ts {:a 1 :b "2" :c 42 :d 23 :? "argh"})
 (def mage
   {:baseproperties {:id (. java.util.UUID randomUUID)
                     :name "John Doe"
@@ -64,10 +60,17 @@
             :paradox-marks :none}
    :historicProperties []})
 
+(def a {:indexed-tabbedpane [{:a 1 :b 2} {:a "x" :b "y"}] :form {:some "other stuff"} :table tbl :heterogeneous-form mage})
+(def b [a {:c 23 :d 42}])
+(def c {:a [{:list "of stuff"}] :b 3})
+(def ts {:a 1 :b "2" :c 42 :d 23 :? "argh"})
 
-(dsui a)
+#_(dsui a)
 
-(s/conform ::dsui.core/dsui-spec tbl)
+#_(s/conform ::dsui.core/dsui-spec tbl)
 
 ; primitives currently not supported
 #_(dsui "2")
+
+(defn -main [& args]
+  (dsui a))

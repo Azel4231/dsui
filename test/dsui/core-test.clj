@@ -11,7 +11,7 @@
 (def prmap {:a 1 :b "2" :c 1/2})
 (def nestmap {:a []})
 
-(deftest primitive-map-test
+(deftest primitive-map-tets
   (is (primitive-map? prmap))
   (is (not (primitive-map? nestmap))))
 
@@ -20,9 +20,9 @@
 (def inhomo  [{:a 1} {:b 2}])
 (def inhomo2  [{:a 1} {:b 2}])
 (deftest homo-test
-  (is (homogenous? homo))
-  (is (not (homogenous? inhomo)))
-  (is (not (homogenous? inhomo2))))
+  (is (homogeneous? homo))
+  (is (not (homogeneous? inhomo)))
+  (is (not (homogeneous? inhomo2))))
 
 
 

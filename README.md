@@ -13,7 +13,6 @@ A more detailed explanation can be found <a href="https://feierabendprojekte.wor
 - Read nested Vectors as a table
 - Spec the function dsui
 - Handle primitive/scalar values
-- Make a version of dsui that returns a JPanel instead of displaying a JFrame, so generated UIs can be used as part of hand-written UIs.
 - Improve UI for deeply nested and/or heterogenous data structures
 
 # License

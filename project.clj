@@ -9,5 +9,6 @@
   :plugins []
   :main dsui.examples
   :source-paths ["src"]
+  :test-paths ["test"]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

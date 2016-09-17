@@ -75,12 +75,13 @@
 (defmethod create ::nested-ui [[_ ds]]
   (create ds))
 
-(defn ^JFrame setup-frame []
-  (frame "DS-UI" #(print "Exiting...")))
+(defn dsui-panel
+  [ds]
+  (create (s/conform ::dsui-spec ds)))
 (defn dsui
   "Creates a (write-only) Swing UI for an arbitrary nested data structure."
   [ds]
-  (let [conformed (s/conform ::dsui-spec ds)]
-    (.setContentPane (setup-frame) (create conformed))))
+  (.setContentPane (frame "DS-UI" #(print "Exiting...")) (dsui-panel ds)))
+
 
 

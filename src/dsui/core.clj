@@ -40,16 +40,16 @@
   (new JLabel (str l)))
 (defn table [tm]
   (new JTable tm))
-(defn keys-to-v [ms]
+(defn ^Vector keys-to-v [ms]
   (let [^Collection ks (->> ms first keys vec)]
     (new Vector ks)))
-(defn vals-to-vofv [ms]
+(defn ^Vector vals-to-vofv [ms]
   (let [rows (->> ms (map vals) (map vec))
         ^Collection vs (->> rows (map (fn [^Collection v] (new Vector v))) vec)]
     (new Vector vs)))
 (defn table-model [ms]
-  (let [^Vector colnames (keys-to-v ms)
-        ^Vector content (vals-to-vofv ms)]
+  (let [colnames (keys-to-v ms)
+        content (vals-to-vofv ms)]
     (new DefaultTableModel content colnames)))
 
 (defmulti create first)

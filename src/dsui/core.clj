@@ -8,18 +8,18 @@
 
 (set! *warn-on-reflection* true)
 
-(defn primitive? [v]
+(defn scalar? [v]
   ((complement coll?) v))
 (defn homogeneous? [coll]
   (and (> (count coll) 2)
        (every? #(= (keys %) (keys (first coll))) coll)))
-(defn primitive-map? [m]
-  (every? primitive? (vals m)))
+(defn scalar-map? [m]
+  (every? scalar? (vals m)))
 (s/def ::dsui-spec (s/or ::table ::tbl-spec ::named-tabsheet ::named-ts-spec ::indexed-tabsheet ::indexed-ts-spec ::form ::form-spec))
-(s/def ::tbl-spec (s/and (s/coll-of map?) (s/every primitive-map?) homogeneous?))
+(s/def ::tbl-spec (s/and (s/coll-of map?) (s/every scalar-map?) homogeneous?))
 (s/def ::named-ts-spec (s/map-of any? ::dsui-spec))
 (s/def ::indexed-ts-spec (s/coll-of ::dsui-spec))
-(s/def ::form-spec (s/map-of any? (s/or ::field primitive? ::nested-ui ::dsui-spec)))
+(s/def ::form-spec (s/map-of any? (s/or ::field scalar? ::nested-ui ::dsui-spec)))
 
 (defn ^JFrame frame [title close-f]
   (doto (new JFrame)

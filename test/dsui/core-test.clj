@@ -1,19 +1,19 @@
 (ns dsui.core-test
   (:use dsui.core)
-  (:use clojure.test))
+  [:use clojure.test])
 
 
 
-(deftest primitive-test
-  (is (primitive? 1))
-  (is (not (primitive? []))))
+(deftest scalar-test
+  (is (scalar? 1))
+  (is (not (scalar? []))))
 
-(def prmap {:a 1 :b "2" :c 1/2})
+(def scalarmap {:a 1 :b "2" :c 1/2})
 (def nestmap {:a []})
 
-(deftest primitive-map-tets
-  (is (primitive-map? prmap))
-  (is (not (primitive-map? nestmap))))
+(deftest scalar-map-tets
+  (is (scalar-map? scalarmap))
+  (is (not (scalar-map? nestmap))))
 
 
 (def homo '({:a 1 :b 2} {:a "1" :b "2"} {:a 1/3 :b 3/7}))
@@ -23,6 +23,9 @@
   (is (homogeneous? homo))
   (is (not (homogeneous? inhomo)))
   (is (not (homogeneous? inhomo2))))
+
+
+
 
 
 

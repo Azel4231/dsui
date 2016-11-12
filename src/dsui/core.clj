@@ -39,7 +39,8 @@
 (defn label [l]
   (new JLabel (str l)))
 (defn table [tm]
-  (new JTable tm))
+  (doto (new JTable tm)
+    (.setEnabled false)))
 (defn ^Vector keys-to-v [ms]
   (let [^Collection ks (->> ms first keys vec)]
     (new Vector ks)))

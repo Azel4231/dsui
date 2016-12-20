@@ -1,6 +1,7 @@
 (ns dsui.examples
   (:use [dsui.core])
-  (:require [clojure.spec :as s]))
+  (:require [clojure.spec :as s]
+            [clojure.spec.test :as test]))
 
 
 (def tbl [{:surname "Jane" :lastname "Doe" :occupation "unknown"}
@@ -9,13 +10,13 @@
           {:surname "Omar" :lastname "Little" :occupation "?"}
           ])
 (def mage
-  {:baseproperties {:id (. java.util.UUID randomUUID)
-                    :name "John Doe"
-                    :player ""
-                    :concept ""
-                    :virtue ""
-                    :vice ""
-                    :size-natural 5}
+  {:id (. java.util.UUID randomUUID)
+   :name "John Doe"
+   :player ""
+   :concept ""
+   :virtue ""
+   :vice ""
+   :size-natural 5
    :properties {:path :obrimos
                 :order :mysterium
                 :cabal ""
@@ -40,8 +41,8 @@
                          :space 0
                          :spirit 0
                          :time 0}
-                :rotes #{}
-                :weapons #{}
+                :rotes []
+                :weapons []
                 :experience-total 0
                 :experience-current 0}
    :ledger {:chronicle ""
@@ -58,19 +59,25 @@
             :spells-protective 0
             :nimbus :none
             :paradox-marks :none}
-   :historicProperties []})
+   :historicProperties [1 2 3 4]})
 
 (def a {:indexed-tabbedpane [{:a 1 :b 2} {:a "x" :b "y"}] :form {:some "other stuff"} :table tbl :heterogeneous-form mage})
-(def b [a {:c 23 :d 42}])
+(def l [4 8 15 16 23 42])
+(def b [a {:c 23 :d 42} :list l])
 (def c {:a [{:list "of stuff"}] :b 3})
 (def ts {:a 1 :b "2" :c 42 :d 23 :? "argh"})
 
 #_(dsui a)
 
-#_(s/conform ::dsui.core/dsui-spec tbl)
+#_(test/instrument `dsui)
+#_(s/explain ::dsui.core/dsui-spec a)
+#_(s/conform ::dsui.core/dsui-spec a)
 
-; primitives currently not supported
+;; primitives currently not supported
 #_(dsui "2")
+
+;; sets currently not supported
+#_(dsui #{"foo" "bar" "baz"})
 
 (defn -main [& args]
   (dsui a))

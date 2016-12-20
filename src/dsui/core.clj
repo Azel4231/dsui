@@ -1,7 +1,7 @@
 (ns dsui.core
   (:require [clojure.spec :as s])
   (:import [java.util Vector Collection]
-           [javax.swing JComponent JFrame JLabel JPanel JTextField JTabbedPane JTable]
+           [javax.swing JComponent JFrame JLabel JPanel JTextField JTabbedPane JTable JList DefaultListModel]
            [javax.swing.table DefaultTableModel]
            [java.awt.event KeyAdapter WindowAdapter]
            [java.awt GridLayout]))
@@ -15,15 +15,21 @@
        (every? #(= (keys %) (keys (first coll))) coll)))
 (defn scalar-map? [m]
   (every? scalar? (vals m)))
-(s/def ::dsui-spec (s/or ::table ::tbl-spec ::named-tabsheet ::named-ts-spec ::indexed-tabsheet ::indexed-ts-spec ::form ::form-spec))
+(s/def ::dsui-spec (s/or ::table ::tbl-spec
+                         ::list ::list-spec
+                         ::named-tabsheet ::named-ts-spec
+                         ::indexed-tabsheet ::indexed-ts-spec
+                         ::form ::form-spec))
 (s/def ::tbl-spec (s/and (s/coll-of map?) (s/every scalar-map?) homogeneous?))
+(s/def ::list-spec (s/and sequential? (s/coll-of scalar? :min-count 3)))
 (s/def ::named-ts-spec (s/map-of any? ::dsui-spec))
 (s/def ::indexed-ts-spec (s/coll-of ::dsui-spec))
-(s/def ::form-spec (s/map-of any? (s/or ::field scalar? ::nested-ui ::dsui-spec)))
+(s/def ::form-spec (s/map-of any? (s/or ::field scalar?
+                                        ::nested-ui ::dsui-spec)))
 
 (defn ^JFrame frame [title close-f]
   (doto (new JFrame)
-    (.setSize (new java.awt.Dimension 400 700))
+    (.setSize (new java.awt.Dimension 800 800))
     (.addWindowListener (proxy [WindowAdapter] [] (windowClosing [e] close-f)))
     (.setTitle title)
     (.setVisible true)))
@@ -52,6 +58,12 @@
   (let [colnames (keys-to-v ms)
         content (vals-to-vofv ms)]
     (new DefaultTableModel content colnames)))
+(defn jlist [^DefaultListModel lm]
+  (new JList lm))
+(defn ^DefaultListModel list-model [coll]
+  (let [lm (new DefaultListModel)]
+    (doseq [el coll] (.addElement lm el))
+    lm))
 
 (defmulti create first)
 (defmethod create ::named-tabsheet [[_ ds]]
@@ -71,6 +83,8 @@
     p))
 (defmethod create ::table [[_ ds]]
   (table (table-model ds)))
+(defmethod create ::list [[_ ds]]
+  (jlist (list-model ds)))
 (defmethod create ::field [[_ ds]]
   (field ds))
 (defmethod create ::nested-ui [[_ ds]]
@@ -79,6 +93,10 @@
 (defn dsui-panel
   [ds]
   (create (s/conform ::dsui-spec ds)))
+
+(s/fdef dsui
+        :args ::dsui-spec
+        :ret any?)
 (defn dsui
   "Creates a (write-only) Swing UI for an arbitrary nested data structure."
   [ds]

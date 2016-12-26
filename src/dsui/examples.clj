@@ -79,5 +79,20 @@
 ;; sets currently not supported
 #_(dsui #{"foo" "bar" "baz"})
 
+
+(def courses [{:name "Linear Algebra" :max-students 15 :room "Gauss" :registered ["11111" "?" "huh?"]}
+              {:name "Introduction to Algorithms" :max-students 25 :room "Dijkstra" :registered ["12345" "?"]}
+              {:name "SICP" :max-students 20 :room "McCarthy" :registered ["12345" "11111" "?"]}])
+(def students [{:name "John Doe" :student-id "12345"}
+               {:name "Jane Doe" :student-id "11111"}
+               {:name "Dr. Who" :student-id "?"}
+               {:name "Dr. Who" :student-id "huh?"}
+               {:name "Dr. Who" :student-id "who?"}])
+(def uni {:name "Foo-University of Bar"
+          :courses courses
+          :students students})
+
+#_(dsui uni)
+
 (defn -main [& args]
   (dsui a))

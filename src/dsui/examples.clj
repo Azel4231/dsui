@@ -79,20 +79,52 @@
 ;; sets currently not supported
 #_(dsui #{"foo" "bar" "baz"})
 
+(s/def ::my-list-of-strings-spec (s/coll-of string?))
+(s/explain ::my-list-of-strings-spec ["x" "y" 42])
+(s/def ::my-map-spec (s/map-of keyword? ::my-list-of-strings-spec))
 
-(def courses [{:name "Linear Algebra" :max-students 15 :room "Gauss" :registered ["11111" "?" "huh?"]}
-              {:name "Introduction to Algorithms" :max-students 25 :room "Dijkstra" :registered ["12345" "?"]}
-              {:name "SICP" :max-students 20 :room "McCarthy" :registered ["12345" "11111" "?"]}])
-(def students [{:name "John Doe" :student-id "12345"}
-               {:name "Jane Doe" :student-id "11111"}
-               {:name "Dr. Who" :student-id "?"}
-               {:name "Dr. Who" :student-id "huh?"}
-               {:name "Dr. Who" :student-id "who?"}])
-(def uni {:name "Foo-University of Bar"
-          :courses courses
-          :students students})
+(s/explain ::my-map-spec {:i ["a" "b" "c"]
+                         :j []
+                          :k ["x" 42]})
 
-#_(dsui uni)
+
+(s/def ::my-account-spec (s/keys 
+                          :req [::email ::auth-method]))
+(s/def ::email string?)
+(s/def ::auth-method (s/or ::credential-auth (s/keys :req [::user ::pwd]) 
+                           ::pubkey-auth (s/keys :req [::pubkey])))
+(s/def ::user string?)
+(s/def ::pwd string?)
+(s/def ::pubkey string?)
+
+(def conf (s/conform ::my-account-spec 
+                     {::email "foo@bar.de"
+                      ::auth-method {::pubkey "xyz..."}
+                      ::other-entries "are allowed"}))
+
+
+(s/conform ::my-account-spec {::email "foo@bar.de"
+                              ::user "John1234"
+                              ::pwd "password4321"
+                              ::other-entries "are ok"})
+
+(s/def ::test-spec (s/and (s/map-of keyword? string?) (s/coll-of string?)))
+(s/explain ::test-spec {:a  "s"})
+
+(defn valid-name? [s] 
+  (Character/isUpperCase (first s)))
+(s/def ::my-map-spec 
+  (s/map-of
+            (s/coll-of valid-name? :s/min-count 1)  keyword?)) 
+(s/valid? ::my-map-spec {::x ["Aaa" "bbb" "Ccc"]
+                         ::y ["Ddd"]})
+(s/explain ::my-map-spec {["Aaa" "bbb" "Ccc"] :x
+                          ["Ddd"] :y})
+
+(s/explain ::my-map-spec {::x ["Aaa" "bbb" "Ccc"]
+                          ::y ["Ddd"]})
+
+
 
 (defn -main [& args]
   (dsui a))

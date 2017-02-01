@@ -12,9 +12,9 @@
 
 (defn scalar? [v]
   ((complement coll?) v))
-(defn homogeneous? [coll]
-  (and (> (count coll) 2)
-       (every? #(= (keys %) (keys (first coll))) coll)))
+(defn homogeneous? [ms]
+  (and (> (count ms) 2)
+       (every? #(= (keys %) (keys (first ms))) ms)))
 (defn scalar-map? [m]
   (every? scalar? (vals m)))
 (s/def ::dsui-spec (s/or ::table ::tbl-spec
@@ -23,7 +23,7 @@
                          ::indexed-tabsheet ::indexed-ts-spec
                          ::form ::form-spec))
 (s/def ::tbl-spec (s/and (s/coll-of map?) (s/every scalar-map?) homogeneous?))
-(s/def ::list-spec (s/and sequential? (s/coll-of scalar? :min-count 3)))
+(s/def ::list-spec (s/and (complement map-entry?) (s/coll-of scalar?)))
 (s/def ::named-ts-spec (s/map-of any? ::dsui-spec))
 (s/def ::indexed-ts-spec (s/coll-of ::dsui-spec))
 (s/def ::form-spec (s/map-of any? (s/or ::field scalar?

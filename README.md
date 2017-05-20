@@ -10,9 +10,7 @@ DSUI uses clojure.spec to "parse" an arbitrary data structure. The conformed dat
 A more detailed explanation can be found <a href="https://feierabendprojekte.wordpress.com/2016/09/11/generating-ui-for-arbitrarily-nested-data-structures/">here</a>.
 
 ## NextSteps
-- Support sets
-- Read nested Vectors as a table
-- Handle primitive/scalar values
+- Handle heterogeneous lists containing primitive/scalar values as well as collections (this would allow "self-hosting" dsui's specs, as conformed values could be displayed in dsui)
 - Make UI editable (e.g. swap value to an atom)
 
 ## License

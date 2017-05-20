@@ -9,7 +9,10 @@
           :courses [{:name "Linear Algebra" :max-students 15 :room "Gauss" :registered ["11111" "?"]}
                     {:name "Introduction to Algorithms" :max-students 25 :room "Dijkstra" :registered ["12345" "?"]}]})
 
-;;(prn (s/conform :dsui.core/dsui-spec uni))
-;;(dsui uni)
+#_(prn (s/conform :dsui.core/structure-spec uni))
+(dsui uni)
+
+
+
 
 

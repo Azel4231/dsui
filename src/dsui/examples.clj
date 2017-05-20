@@ -124,7 +124,36 @@
 (s/explain ::my-map-spec {::x ["Aaa" "bbb" "Ccc"]
                           ::y ["Ddd"]})
 
+(s/def ::my-choice-spec (s/or ::map (s/map-of keyword? string?)
+                              ::coll (s/coll-of string?)))
+
+(s/valid? ::my-choice-spec 42)
+(s/explain ::my-choice-spec 42)
 
 
 (defn -main [& args]
   (dsui a))
+
+
+
+(s/def ::fruit (s/or ::orange ::orange
+                     ::apple ::apple))
+
+(s/def ::fruit-map (s/keys :req [::diameter ::color]))
+(s/def ::orange (s/and ::fruit-map
+                       #(>= 10 (::diameter %))
+                       #(= :orange (::color %))))
+(s/def ::apple (s/and ::fruit-map
+                      #(>= 8 (::diameter %))
+                      #(= :green (::color %))))
+
+
+(s/conform ::fruit {::color :orange
+                    ::diameter 9})
+;; => orange
+(s/conform ::fruit {::color :green
+                    ::diameter 9})
+;; => invalid
+(s/conform ::fruit {::color :green
+                    ::diameter 8})
+;; => apple

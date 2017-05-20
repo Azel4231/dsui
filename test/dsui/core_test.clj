@@ -31,3 +31,10 @@
   (is (= [[1 2 3]
           ["1" 2 3.0]
           [:A nil "idk?"]] (vals-to-vofv ms))))
+
+
+(deftest table-model-test
+  (let [tm (table-model '("A" "B" "c") [[1 2 3]
+                                        [:1 :2 :3]
+                                        ["1" nil 3.0]])]
+    (is (= 3 (.getColumnCount tm)))))

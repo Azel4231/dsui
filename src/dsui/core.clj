@@ -1,7 +1,7 @@
 (ns dsui.core
   (:require [clojure.spec :as s])
   (:import [java.util Vector Collection]
-           [javax.swing JFrame JLabel JPanel JTextField JTabbedPane JTable JList DefaultListModel JScrollPane]
+           [javax.swing SwingUtilities JFrame JLabel JPanel JTextField JTabbedPane JTable JList DefaultListModel JScrollPane]
            [javax.swing.table DefaultTableModel]
            [java.awt.event KeyAdapter WindowAdapter]
            [java.awt Container GridBagLayout GridBagConstraints]))
@@ -152,7 +152,8 @@
   "Creates a (write-only) Swing UI for an arbitrary nested data structure."
   [ds]
   (doto (frame "DS-UI" #(print "Exiting..."))
-    (.setContentPane (dsui-panel ds)))) 
+    (.setContentPane (dsui-panel ds))
+    (#(. SwingUtilities updateComponentTreeUI %)))) 
 
 
 

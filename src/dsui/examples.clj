@@ -76,84 +76,8 @@
 ;; primitives currently not supported
 #_(dsui "2")
 
-;; sets currently not supported
-#_(dsui #{"foo" "bar" "baz"})
-
-(s/def ::my-list-of-strings-spec (s/coll-of string?))
-(s/explain ::my-list-of-strings-spec ["x" "y" 42])
-(s/def ::my-map-spec (s/map-of keyword? ::my-list-of-strings-spec))
-
-(s/explain ::my-map-spec {:i ["a" "b" "c"]
-                         :j []
-                          :k ["x" 42]})
-
-
-(s/def ::my-account-spec (s/keys 
-                          :req [::email ::auth-method]))
-(s/def ::email string?)
-(s/def ::auth-method (s/or ::credential-auth (s/keys :req [::user ::pwd]) 
-                           ::pubkey-auth (s/keys :req [::pubkey])))
-(s/def ::user string?)
-(s/def ::pwd string?)
-(s/def ::pubkey string?)
-
-(def conf (s/conform ::my-account-spec 
-                     {::email "foo@bar.de"
-                      ::auth-method {::pubkey "xyz..."}
-                      ::other-entries "are allowed"}))
-
-
-(s/conform ::my-account-spec {::email "foo@bar.de"
-                              ::user "John1234"
-                              ::pwd "password4321"
-                              ::other-entries "are ok"})
-
-(s/def ::test-spec (s/and (s/map-of keyword? string?) (s/coll-of string?)))
-(s/explain ::test-spec {:a  "s"})
-
-(defn valid-name? [s] 
-  (Character/isUpperCase (first s)))
-(s/def ::my-map-spec 
-  (s/map-of
-            (s/coll-of valid-name? :s/min-count 1)  keyword?)) 
-(s/valid? ::my-map-spec {::x ["Aaa" "bbb" "Ccc"]
-                         ::y ["Ddd"]})
-(s/explain ::my-map-spec {["Aaa" "bbb" "Ccc"] :x
-                          ["Ddd"] :y})
-
-(s/explain ::my-map-spec {::x ["Aaa" "bbb" "Ccc"]
-                          ::y ["Ddd"]})
-
-(s/def ::my-choice-spec (s/or ::map (s/map-of keyword? string?)
-                              ::coll (s/coll-of string?)))
-
-(s/valid? ::my-choice-spec 42)
-(s/explain ::my-choice-spec 42)
-
-
-(defn -main [& args]
-  (dsui a))
 
 
 
-(s/def ::fruit (s/or ::orange ::orange
-                     ::apple ::apple))
-
-(s/def ::fruit-map (s/keys :req [::diameter ::color]))
-(s/def ::orange (s/and ::fruit-map
-                       #(>= 10 (::diameter %))
-                       #(= :orange (::color %))))
-(s/def ::apple (s/and ::fruit-map
-                      #(>= 8 (::diameter %))
-                      #(= :green (::color %))))
 
 
-(s/conform ::fruit {::color :orange
-                    ::diameter 9})
-;; => orange
-(s/conform ::fruit {::color :green
-                    ::diameter 9})
-;; => invalid
-(s/conform ::fruit {::color :green
-                    ::diameter 8})
-;; => apple

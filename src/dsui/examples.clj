@@ -1,7 +1,7 @@
 (ns dsui.examples
   (:use [dsui.core])
-  (:require [clojure.spec :as s]
-            [clojure.spec.test :as test]))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as test]))
 
 
 (def tbl [{:surname "Jane" :lastname "Doe" :occupation "unknown"}

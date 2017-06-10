@@ -1,5 +1,5 @@
 (ns dsui.core
-  (:require [clojure.spec :as s])
+  (:require [clojure.spec.alpha :as s])
   (:import [java.util Vector Collection]
            [javax.swing SwingUtilities JFrame JLabel JPanel JTextField JTabbedPane JTable JList DefaultListModel JScrollPane]
            [javax.swing.table DefaultTableModel]
@@ -13,26 +13,38 @@
 (defn scalar? [v]
   ((complement coll?) v))
 
+(defn same? [f coll]
+  (if (empty? coll) false
+      (apply = (map f coll))))
+
 (defn homogeneous? [ms]
-  (and (>= (count ms) 2)
-       (every? #(= (keys %) (keys (first ms))) ms)))
+  (same? keys ms))
 
 (defn scalar-map? [m]
   (every? scalar? (vals m)))
 
-(s/def ::structure-spec (s/or ::table-of-entities ::table-of-entities
-                              ::matrix ::matrix
-                              ::list-of-scalars ::list-of-scalars
-                              ::list-of-structures ::list-of-structures
-                              ::entity ::entity))
-
-(s/def ::table-of-entities (s/and (s/coll-of map?) (s/every scalar-map?) homogeneous?))
-(s/def ::matrix (s/coll-of ::list-of-scalars))
-(s/def ::list-of-scalars (s/and (complement map-entry?) (s/coll-of scalar?)))
-(s/def ::list-of-structures (s/coll-of ::structure-spec))
-(s/def ::entity (s/map-of any? (s/or ::property scalar?
-                                     ::nested-structure ::structure-spec)))
-
+(s/def ::ds (s/or ::table-of-entities ::table-of-entities
+                  ::matrix ::matrix
+                  ::list-of-scalars ::list-of-scalars
+                  ::list-of-dss ::list-of-dss
+                  ::entity ::entity
+                  ::labeled-ds ::labeled-ds
+                  ))
+(s/def ::table-of-entities (s/and (s/coll-of map?)
+                                  (s/every scalar-map?)
+                                  homogeneous?))
+(s/def ::matrix (s/and (s/coll-of ::list-of-scalars)
+                       #(same? count %)))
+(s/def ::list-of-scalars (s/and (s/coll-of scalar?)
+                                (complement map-entry?)))
+(s/def ::list-of-dss (s/and (s/coll-of ::ds)
+                            (complement map?)
+                            (complement map-entry?)))
+(s/def ::entity (s/map-of any? ::ds-or-scalar))
+(s/def ::labeled-ds (s/and map-entry?
+                           (s/tuple keyword? ::ds-or-scalar)))
+(s/def ::ds-or-scalar (s/or ::scalar scalar?
+                            ::nested-ds ::ds))
 
 (defn ^JFrame frame [title close-f]
   (doto (new JFrame)
@@ -95,7 +107,9 @@
 (defn field-gbc [x y]
   (gb-constraints {:x x :y y :fl GridBagConstraints/HORIZONTAL :gw 1 :wx 1.0 :wy 0.0 :a GridBagConstraints/PAGE_START}))
 
-(defn- create-ts [m]
+(defmulti create first)
+
+(defn tabbed-pane [m]
   (let [tpane (new JTabbedPane)]
     (doseq [[k v] m]
       (.addTab tpane (str k) (create v)))
@@ -103,26 +117,32 @@
 
 
 
-(defmulti create first)
+(defmethod create ::scalar [[_ ds]]
+  (label ds))
 
-(defmethod create ::list-of-structures [[_ ds]]
-  (let [tpane (new JTabbedPane)]
-    (->> ds
-         (map-indexed (fn [i v] (.addTab tpane (str i) (create v))))
-         doall)
+(defmethod create ::list-of-dss [[_ ds]]
+  (let [m (into {} (map-indexed (fn [i v] [i v]) ds))
+        ^JTabbedPane tpane (tabbed-pane m)]
+    (. tpane setTabPlacement JTabbedPane/LEFT)
+    tpane))
+
+(defmethod create ::labeled-ds [[_ ds]]
+  (let [m (into {} [ds])
+        ^JTabbedPane tpane (tabbed-pane m)]
+    (. tpane setTabPlacement JTabbedPane/LEFT)
     tpane))
 
 (defmethod create ::entity [[_ ds]]
   (let [p (panel)
         layout-cols (* 2 colnumber)
-        fields (filter #(= ::property (first (second %))) ds)
-        nested-uis (filter #(= ::nested-structure (first (second %))) ds)]
+        fields (filter #(= ::scalar (first (second %))) ds)
+        nested-uis (filter #(= ::nested-ds (first (second %))) ds)]
     (add p
          (for [[kw childDs] fields]
            [(label kw) (create childDs)])
          (for [i (range (* 2 (count fields)))]
            (field-gbc (mod i layout-cols) (quot i layout-cols))))
-    (add p [(create-ts (into {} nested-uis))]
+    (add p [(tabbed-pane (into {} nested-uis))]
          [(panel-gbc (inc (quot (count fields) colnumber)))])
     p))
 
@@ -135,25 +155,28 @@
 (defmethod create ::list-of-scalars [[_ ds]]
   (jlist (list-model ds)))
 
-(defmethod create ::property [[_ ds]]
+(defmethod create ::scalar [[_ ds]]
   (field ds))
 
-(defmethod create ::nested-structure [[_ ds]]
+(defmethod create ::nested-ds [[_ ds]]
   (create ds))
 
 (defn dsui-panel
   [ds]
-  (create (s/conform ::structure-spec ds)))
+  (create (s/conform ::ds ds)))
+
+(defn- refresh [frm]
+  (. SwingUtilities invokeLater (fn [] (. SwingUtilities updateComponentTreeUI frm))))
 
 (s/fdef dsui
-        :args ::structure-spec
+        :args ::ds
         :ret any?)
 (defn dsui
   "Creates a (write-only) Swing UI for an arbitrary nested data structure."
   [ds]
   (doto (frame "DS-UI" #(print "Exiting..."))
     (.setContentPane (dsui-panel ds))
-    (#(. SwingUtilities updateComponentTreeUI %)))) 
+    refresh)) 
 
 
 

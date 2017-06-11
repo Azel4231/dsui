@@ -1,14 +1,22 @@
 (ns dsui.examples
   (:use [dsui.core])
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.test.alpha :as test]))
+  (:require [clojure.spec.alpha :as s]))
 
+
+(def uni {:name "Foo-University of Bar"
+          :students [{:name "John Doe" :student-id "12345"}
+                     {:name "Jane Doe" :student-id "11111"}
+                     {:name "Dr. Who" :student-id "?"}]
+          :courses [{:name "Linear Algebra" :max-students 15 :room "Gauss" :registered ["11111" "?"]}
+                    {:name "Introduction to Algorithms" :max-students 25 :room "Dijkstra" :registered ["12345" "?"]}]})
 
 (def tbl [{:surname "Jane" :lastname "Doe" :occupation "unknown"}
           {:surname "Jimmy" :lastname "McNulty" :occupation "Criminal Investigator"}
           {:surname "Bunk" :lastname "Moreland" :occupation "Criminal Investigator"}
           {:surname "Omar" :lastname "Little" :occupation "?"}
           ])
+
+
 (def mage
   {:id (. java.util.UUID randomUUID)
    :name "John Doe"
@@ -61,20 +69,20 @@
             :paradox-marks :none}
    :historicProperties [1 2 3 4]})
 
-(def a {:indexed-tabbedpane [{:a 1 :b 2} {:a "x" :b "y"}] :form {:some "other stuff"} :table tbl :heterogeneous-form mage})
-(def l [4 8 15 16 23 42])
-(def b [a {:c 23 :d 42} :list l])
-(def c {:a [{:list "of stuff"}] :b 3})
-(def ts {:a 1 :b "2" :c 42 :d 23 :? "argh"})
+(def example {:scalar-value 42
+              :list-of-scalars [1 4 9 16]
+              :list-of-datastructures ["this" "is" "a" "heterogeneous" "list" #{:with :nested :stuff}]
+              :table tbl
+              :matrix [[1 2 3] ["a" "b" "c"] [1.2 1/4 4.5M]]
+              :conformed-data (s/conform :dsui.core/ds uni)
+              :small-example uni
+              :larger-example mage
+              })
 
-#_(dsui a)
-
-#_(test/instrument `dsui)
-#_(s/explain ::dsui.core/dsui-spec a)
-#_(s/conform ::dsui.core/dsui-spec a)
+(dsui example)
 
 ;; primitives currently not supported
-#_(dsui "2")
+#_(dsui 42)
 
 
 

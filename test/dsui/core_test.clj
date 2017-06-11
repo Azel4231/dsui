@@ -37,4 +37,27 @@
            [:dsui.core/list-of-scalars ["a" "B" 1 2 3]]))
     (is (map-entry? conformed-data))
     (is (= conformed²-data
-           [:dsui.core/labeled-ds [:dsui.core/list-of-scalars ["a" "B" 1 2 3]]]))))
+           [:dsui.core/labeled-ds [:dsui.core/list-of-scalars
+                                   [:dsui.core/nested-ds
+                                    [:dsui.core/list-of-scalars ["a" "B" 1 2 3]]]]]))))
+
+(deftest matrix-test
+  (is (= (s/conform :dsui.core/ds [["a" "B"] [1 2]])
+         [:dsui.core/matrix [["a" "B"] [1 2]]]))
+  ;; test same structure, only with map entries
+  (is (= (s/conform :dsui.core/ds (seq {"a" "B" 1 2}))
+         [:dsui.core/matrix [["a" "B"] [1 2]]])))
+
+(deftest list-of-scalars-test
+  (is (= (s/conform :dsui.core/ds ["a" "B"])
+         [:dsui.core/list-of-scalars ["a" "B"]])))
+
+(deftest scalar-entity-test
+  (is (= (s/conform :dsui.core/ds {:a "A"
+                                   :b 2
+                                   :c 1/3
+                                   :d 4.0})
+         [:dsui.core/entity {:a [:dsui.core/scalar "A"]
+                             :b [:dsui.core/scalar 2]
+                             :c [:dsui.core/scalar 1/3]
+                             :d [:dsui.core/scalar 4.0]}])))

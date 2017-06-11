@@ -23,28 +23,34 @@
 (defn scalar-map? [m]
   (every? scalar? (vals m)))
 
-(s/def ::ds (s/or ::table-of-entities ::table-of-entities
+(s/def ::ds (s/or ::entity ::entity
+                  ::table-of-entities ::table-of-entities
                   ::matrix ::matrix
-                  ::list-of-scalars ::list-of-scalars
-                  ::list-of-dss ::list-of-dss
-                  ::entity ::entity
                   ::labeled-ds ::labeled-ds
-                  ))
+                  ::list-of-scalars ::list-of-scalars
+                  ::list-of-dss ::list-of-dss))
+
 (s/def ::table-of-entities (s/and (s/coll-of map?)
                                   (s/every scalar-map?)
                                   homogeneous?))
+
 (s/def ::matrix (s/and (s/coll-of ::list-of-scalars)
                        #(same? count %)))
-(s/def ::list-of-scalars (s/and (s/coll-of scalar?)
-                                (complement map-entry?)))
-(s/def ::list-of-dss (s/and (s/coll-of ::ds)
-                            (complement map?)
-                            (complement map-entry?)))
+
+(s/def ::list-of-scalars (s/coll-of ::scalar))
+
+(s/def ::list-of-dss (s/and (s/coll-of ::ds-or-scalar)
+                            (complement map?)))
+
 (s/def ::entity (s/map-of any? ::ds-or-scalar))
+
 (s/def ::labeled-ds (s/and map-entry?
                            (s/tuple keyword? ::ds-or-scalar)))
-(s/def ::ds-or-scalar (s/or ::scalar scalar?
-                            ::nested-ds ::ds))
+
+(s/def ::ds-or-scalar (s/or ::nested-ds ::ds
+                            ::scalar ::scalar))
+
+(s/def ::scalar scalar?)
 
 (defn ^JFrame frame [title close-f]
   (doto (new JFrame)
@@ -172,7 +178,7 @@
         :args ::ds
         :ret any?)
 (defn dsui
-  "Creates a (write-only) Swing UI for an arbitrary nested data structure."
+  "Creates a read-only, form-based swing UI for an arbitrary nested data structure."
   [ds]
   (doto (frame "DS-UI" #(print "Exiting..."))
     (.setContentPane (dsui-panel ds))

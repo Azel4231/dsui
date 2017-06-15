@@ -1,7 +1,8 @@
 (ns dsui.core-test
   (:use dsui.core)
   [:use clojure.test]
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [dsui.core :as core]))
 
 (deftest scalar-test
   (is (scalar? 1))
@@ -20,13 +21,6 @@
   (is (homogeneous? homo))
   (is (not (homogeneous? inhomo)))
   (is (not (homogeneous? inhomo2))))
-
-
-(deftest table-model-test
-  (let [tm (table-model '("A" "B" "c") [[1 2 3]
-                                        [:1 :2 :3]])]
-    (is (= 3 (.getColumnCount tm)))
-    (is (= 2 (.getRowCount tm)))))
 
 
 (def list-data ["a" "B" 1 2 3])

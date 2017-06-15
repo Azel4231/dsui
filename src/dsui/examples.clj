@@ -1,6 +1,6 @@
 (ns dsui.examples
-  (:use [dsui.core])
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [dsui.swing :as swing]))
 
 
 (def uni {:name "Foo-University of Bar"
@@ -73,13 +73,13 @@
               :list-of-scalars [1 4 9 16]
               :list-of-datastructures ["this" "is" "a" "heterogeneous" "list" #{:with :nested :stuff}]
               :table tbl
-              :matrix [[1 2 3] ["a" "b" "c"] [1.2 1/4 4.5M]]
+              :matrix [[1 2 3] ["a" "b" "c"] [1.2 1/4 4.5]]
               :conformed-data (s/conform :dsui.core/ds uni)
               :small-example uni
               :larger-example mage
               })
 
-(dsui example)
+(swing/dsui example)
 
 ;; primitives currently not supported
 #_(dsui 42)

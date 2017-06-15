@@ -1,5 +1,5 @@
 # DSUI
-A Clojure tool for displaying arbitrary, nested data structures as a form-based UI with Swing. DSUI stands for "Data Structure User Interface".
+A Clojure tool for displaying arbitrary, nested data structures as a read-only, form-based UI. DSUI stands for "Data Structure User Interface".
 
 ## Status
 - Serious toy project
@@ -25,6 +25,9 @@ Displays:
 
 Does not support:
 - a single scalar value
+
+Not suited for:
+- graph-like data
 
 ## How it works
 DSUI uses clojure.spec to "parse" an arbitrary data structure. The conformed data is used to generate the swing UI by calling a multimethod that polymorphically creates different types of UI elements.

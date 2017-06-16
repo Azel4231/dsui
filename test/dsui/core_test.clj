@@ -2,7 +2,8 @@
   (:use dsui.core)
   [:use clojure.test]
   (:require [clojure.spec.alpha :as s]
-            [dsui.core :as core]))
+            [dsui.core :as core]
+            [dsui.swing :as swing]))
 
 (deftest scalar-test
   (is (scalar? 1))
@@ -21,6 +22,7 @@
   (is (homogeneous? homo))
   (is (not (homogeneous? inhomo)))
   (is (not (homogeneous? inhomo2))))
+
 
 
 (def list-data ["a" "B" 1 2 3])
@@ -55,3 +57,15 @@
                              :b [:dsui.core/scalar 2]
                              :c [:dsui.core/scalar 1/3]
                              :d [:dsui.core/scalar 4.0]}])))
+
+;; match table if there is more than one entity, otherwise detect entity in a list
+(deftest table-test
+  (is (= [:dsui.core/table-of-entities [{:a 1}
+                                        {:a 2}]]
+         (s/conform :dsui.core/ds [{:a 1}
+                                   {:a 2}])))   
+  (is (= [:dsui.core/list-of-dss
+          [[:dsui.core/nested-ds
+            [:dsui.core/entity {:a [:dsui.core/scalar 1]}]]]]
+         (s/conform :dsui.core/ds [{:a 1}]))))
+

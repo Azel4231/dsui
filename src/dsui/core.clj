@@ -23,7 +23,7 @@
                   ::list-of-scalars ::list-of-scalars
                   ::list-of-dss ::list-of-dss))
 
-(s/def ::table-of-entities (s/and (s/coll-of map?)
+(s/def ::table-of-entities (s/and (s/coll-of map? :min-count 2)
                                   (s/every scalar-map?)
                                   homogeneous?))
 

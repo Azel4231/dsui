@@ -1,12 +1,13 @@
 (ns dsui.swing
-  (:require [clojure.spec.alpha :as s]
-            [dsui.core :as core]
-            [dsui.ui :as ui])
+  (:require [clojure.spec.alpha :as s])
   (:import [java.util Vector Collection]
            [javax.swing SwingUtilities JFrame JLabel JPanel JTextField JTabbedPane JTable JList DefaultListModel JScrollPane]
            [javax.swing.table DefaultTableModel]
            [java.awt.event KeyAdapter WindowAdapter]
            [java.awt Container GridBagLayout GridBagConstraints]))
+
+
+(def colnumber 3)
 
 (defn ^JFrame frame [title close-f]
   (doto (new JFrame)
@@ -64,7 +65,7 @@
     gbc))
 
 (defn panel-gbc [y]
-  (gb-constraints {:x 0 :y y :fl GridBagConstraints/BOTH :gw (* 2 ui/colnumber) :wx 1.0 :wy 1.0 :a GridBagConstraints/PAGE_START}))
+  (gb-constraints {:x 0 :y y :fl GridBagConstraints/BOTH :gw (* 2 colnumber) :wx 1.0 :wy 1.0 :a GridBagConstraints/PAGE_START}))
 
 (defn field-gbc [x y]
   (gb-constraints {:x x :y y :fl GridBagConstraints/HORIZONTAL :gw 1 :wx 1.0 :wy 0.0 :a GridBagConstraints/PAGE_START}))
@@ -96,7 +97,7 @@
 
 (defmethod create :dsui.core/entity [[_ ds]]
   (let [p (panel)
-        layout-cols (* 2 ui/colnumber)
+        layout-cols (* 2 colnumber)
         fields (filter #(= :dsui.core/scalar (first (second %))) ds)
         nested-uis (filter #(= :dsui.core/nested-ds (first (second %))) ds)]
     (add p
@@ -105,7 +106,7 @@
          (for [i (range (* 2 (count fields)))]
            (field-gbc (mod i layout-cols) (quot i layout-cols))))
     (add p [(tabbed-pane (into {} nested-uis))]
-         [(panel-gbc (inc (quot (count fields) ui/colnumber)))])
+         [(panel-gbc (inc (quot (count fields) colnumber)))])
     p))
 
 (defmethod create :dsui.core/table-of-entities [[_ ds]]
@@ -130,7 +131,7 @@
 (defn- refresh [frm]
   (. SwingUtilities invokeLater (fn [] (. SwingUtilities updateComponentTreeUI frm))))
 
-(s/fdef dsui
+#_(s/fdef dsui
         :args :dsui.core/ds
         :ret any?)
 (defn dsui

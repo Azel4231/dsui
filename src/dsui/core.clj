@@ -1,5 +1,9 @@
 (ns dsui.core
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [dsui.swing :as swing]
+            [fn-fx.fx-dom :as dom]
+            [fn-fx.controls :as ui]
+            [fn-fx.diff :refer [component defui render should-update?]]))
 
 (set! *warn-on-reflection* true)
 
@@ -46,28 +50,104 @@
 (s/def ::scalar scalar?)
 
 
-#_(defn normalize [ds]
-  )
 
-#_(defmulti normalize-node first)
-#_(defmethod normalize-node :entity [[_ ds]]
-  )
-
-
-
+;; Umformungen
+;; - Entity: Aufteilung in zwei Kinder
+;; - matrix: Konvertierung in List of Maps
+;; - Tab Ausrichtung
+;; - Indizes Felder
+;; - Allgemein: übersetzung in Maps mit type statt labeled data
 
 
-#_(comment (defmethod create ::entity [[_ ds]]
-           (let [p (panel)
-                 layout-cols (* 2 colnumber)
-                 fields (filter #(= ::scalar (first (second %))) ds)
-                 nested-uis (filter #(= ::nested-ds (first (second %))) ds)]
-             (add p
-                  (for [[kw childDs] fields]
-                    [(label kw) (create childDs)])
-                  (for [i (range (* 2 (count fields)))]
-                    (field-gbc (mod i layout-cols) (quot i layout-cols))))
-             (add p [(tabbed-pane (into {} nested-uis))]
-                  [(panel-gbc (inc (quot (count fields) colnumber)))])
-             p)))
+(defmulti to-ui first)
 
+  
+(defn tab [[n content-ds]]
+  {:type :tab
+   :name n
+   :children [(to-ui content-ds)]})
+
+(defn tab-pane [coll]
+  {:type :tab-pane
+   :children (map tab coll)})
+
+(defn label [t]
+  {:type :label
+   :text (str t)})
+
+(defn field [[k ds]]
+  [(label k)
+   (to-ui ds)])
+
+(defn grid-pane [coll]
+  {:type :grid-pane 
+   :children (mapcat field coll)})
+
+(defn list-item [v]
+  {:type :list-cell
+   :value (str v)})
+
+
+(defmethod to-ui :default [[_ ds]]
+  (label ds))
+
+(defmethod to-ui ::list-of-dss [[_ ds]]
+  (let [tabs (map-indexed (fn [i v] [i v]) ds)]
+    (-> (tab-pane tabs)
+        (assoc :tab-position :left)
+        (assoc :tab-orientation :horizontal))))
+
+(defmethod to-ui ::labeled-ds [[_ ds]]
+  (-> (tab-pane [ds])  ;; one tab only (for the label)
+      (assoc :tab-position :left)
+      (assoc :tab-orientation :vertical)))
+
+(defmethod to-ui ::entity [[_ ds]]
+  (let [children (group-by #(key (val %)) ds)
+        fields (::scalar children)
+        nested-uis (::nested-ds children)
+        children [(grid-pane fields) #_(tab-pane nested-uis)]]
+    {:type :flow-pane
+     :children children}))  
+
+#_(defmethod to-ui :table-of-entities [[_ ds]]
+(table (table-model (keys (first ds)) (map vals ds))))
+
+#_(defmethod to-ui :matrix [[_ ds]]
+(table (table-model (range (count (first ds))) ds)))
+
+(defmethod to-ui ::list-of-scalars [[_ ds]]
+  {:type :ListView
+   :children (map list-item ds)})
+
+(defmethod to-ui ::scalar [[_ ds]]
+  {:type :text-field
+   :text (str ds)})
+
+(defmethod to-ui ::nested-ds [[_ ds]]
+  (to-ui ds))
+
+
+
+
+
+
+
+
+
+
+(defn dsui [ds]
+  (->> ds
+       (s/conform ::ds)
+       #_to-ui
+       swing/create))
+
+(defn exception-ui [t]
+  (-> t Throwable->map dsui))
+
+(defn conform-ui [spec ds]
+  (try (let [confed (s/conform spec ds)]
+         (if (= :clojure.spec.alpha/invalid confed)
+           (dsui (s/explain-data spec ds))
+           (dsui confed)))
+       (catch Throwable t (exception-ui t))))

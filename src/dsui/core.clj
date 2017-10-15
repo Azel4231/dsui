@@ -45,29 +45,3 @@
 
 (s/def ::scalar scalar?)
 
-
-#_(defn normalize [ds]
-  )
-
-#_(defmulti normalize-node first)
-#_(defmethod normalize-node :entity [[_ ds]]
-  )
-
-
-
-
-
-#_(comment (defmethod create ::entity [[_ ds]]
-           (let [p (panel)
-                 layout-cols (* 2 colnumber)
-                 fields (filter #(= ::scalar (first (second %))) ds)
-                 nested-uis (filter #(= ::nested-ds (first (second %))) ds)]
-             (add p
-                  (for [[kw childDs] fields]
-                    [(label kw) (create childDs)])
-                  (for [i (range (* 2 (count fields)))]
-                    (field-gbc (mod i layout-cols) (quot i layout-cols))))
-             (add p [(tabbed-pane (into {} nested-uis))]
-                  [(panel-gbc (inc (quot (count fields) colnumber)))])
-             p)))
-

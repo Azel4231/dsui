@@ -139,3 +139,12 @@
   (doto (frame "DS-UI" #(print "Exiting..."))
     (.setContentPane (dsui-panel ds))
     refresh)) 
+
+
+(defn conform-ui
+  "Shows how the data conformed to the spec. Useful for specs with choices (via s/or) or labeled values (vis s/cat). If the data does not conform, displays the explanation (explain-data) as a ui."
+  [spec data]
+  (let [conf (s/conform spec data)]
+    (if (= :clojure.spec.alpha/invalid conf)
+      (dsui (s/explain-data spec data))
+      (dsui conf))))

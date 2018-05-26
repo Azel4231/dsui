@@ -13,17 +13,47 @@ A Clojure tool for displaying arbitrary, nested data structures as a read-only, 
 
 ## Usage
 
-```clojure
-(dsui.swing/dsui any-data)
-```
+### Installing the library
 
-displays the data as a form-based UI.
+Via deps:
 
 ```clojure
-(dsui.swing/conform-ui ::any-spec any-data)
+{:deps {org.clojars.azel4231/dsui {:mvn/version "0.1.0"}}}
 ```
 
-shows how the data conformed to the spec. Useful for specs with choices (via s/or) or labeled values (vis s/cat). If the data does not conform, displays the explanation (explain-data) as a ui.
+Via lein:
+
+```clojure
+:dependencies [[org.clojars.azel4231/dsui "0.1.0"]]
+```
+
+Via maven:
+
+```
+<dependency>
+  <groupId>org.clojars.azel4231</groupId>
+  <artifactId>dsui</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+### Calling the library 
+
+```clojure
+(require '[dsui.swing :as d])
+```
+
+Display data as a form-based UI:
+
+```clojure
+(d/dsui any-data)
+```
+
+Show how data conforms to a spec. Useful for specs with choices (via s/or) or labeled values (vis s/cat). If the data does not conform, displays the explanation (explain-data) as a ui:
+
+```clojure
+(d/conform-ui ::any-spec any-data)
+```
 
 ## Basic Features
 Displays:
@@ -39,6 +69,7 @@ Does not support:
 
 Not suited for:
 - graph-like data
+- large data-sets (generating the UI is currently eager)
 
 ## How it works
 DSUI uses clojure.spec to "parse" an arbitrary data structure. The conformed data is used to generate the swing UI by calling a multimethod that polymorphically creates different types of UI elements.

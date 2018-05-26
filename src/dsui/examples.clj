@@ -1,4 +1,5 @@
 (ns dsui.examples
+  (:gen-class)
   (:require [clojure.spec.alpha :as s]
             [dsui.swing :as swing]))
 
@@ -79,40 +80,11 @@
               :larger-example mage
               })
 
-(swing/dsui example)
+(defn -main [& args]
+   (swing/dsui example))
 
 ;; primitives currently not supported
 #_(swing/dsui 42)
-
-
-
-
-(defn apple? [{d ::diameter c ::color}]
-  (and (<= 5 d 10)
-       (#{:green :red} c)))
-
-(defn orange? [{d ::diameter c ::color}]
-  (and (<= 6 d 12)
-       (= c :orange)))
-
-(s/def ::fruit (s/and (s/keys :req [::diameter ::color])
-                      (s/or :apple apple?
-                            :orange orange?)))
-
-;; spec finds orange
-#_(swing/conform-ui ::fruit {::diameter 8
-                           ::color :orange})
-
-;; spec finds apple
-#_(swing/conform-ui ::fruit {::diameter 8
-                           ::color :red})
-
-;; data does not conform -> explain UI
-#_(swing/conform-ui ::fruit {::diameter 1
-                           ::color :blue})
-
-
-
 
 ;; displays the last exception as a ui
 #_(-> *e Throwable->map swing/dsui)

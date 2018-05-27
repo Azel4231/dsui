@@ -1,6 +1,8 @@
 # DSUI
 A Clojure tool for displaying arbitrary, nested data structures as a read-only, form-based UI. DSUI stands for "Data Structure User Interface".
 
+[![Clojars Project](https://img.shields.io/clojars/v/org.clojars.azel4231/dsui.svg)](https://clojars.org/org.clojars.azel4231/dsui)
+
 ## Motivation
 
 1. Being tired of writing UI code.

@@ -20,13 +20,13 @@ A Clojure tool for displaying arbitrary, nested data structures as a read-only, 
 Via deps:
 
 ```clojure
-{:deps {org.clojars.azel4231/dsui {:mvn/version "0.1.0"}}}
+{:deps {org.clojars.azel4231/dsui {:mvn/version "0.1.1"}}}
 ```
 
 Via lein:
 
 ```clojure
-:dependencies [[org.clojars.azel4231/dsui "0.1.0"]]
+:dependencies [[org.clojars.azel4231/dsui "0.1.1"]]
 ```
 
 Via maven:
@@ -35,7 +35,7 @@ Via maven:
 <dependency>
   <groupId>org.clojars.azel4231</groupId>
   <artifactId>dsui</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 
@@ -56,6 +56,22 @@ Show how data conforms to a spec. Useful for specs with choices (via s/or) or la
 ```clojure
 (d/conform-ui ::any-spec any-data)
 ```
+
+Attach dsui to a ref and leave it open:
+
+```clojure
+(defonce state (atom []))
+(defonce ui (d/watch-ui state))
+```
+
+Swap new data into the atom to update the watch-ui window (REPL workflow)
+
+```clojure
+(reset! state '[1 2 3 "A" "B" "C" + - * /])
+```
+
+Or just have it display your app's changing app-state.
+
 
 ## Basic Features
 Displays:
@@ -83,7 +99,6 @@ More detailed explanations can be found <a href="https://feierabendprojekte.word
 - Migrate to <a href="https://github.com/halgari/fn-fx">fn-fx</a>
 
 ## Distant Future
-- Attach to atom and let DSUI "watch" changes
 - Make UI editable (e.g. swap value to an atom)
 
 ## License

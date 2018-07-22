@@ -1,5 +1,4 @@
 (ns dsui.examples
-  (:gen-class)
   (:require [clojure.spec.alpha :as s]
             [dsui.swing :as swing]))
 
@@ -81,7 +80,26 @@
               })
 
 (defn -main [& args]
-   (swing/dsui example))
+  (swing/dsui example (fn [_]
+                        (println "Exiting!")
+                        (System/exit 0))))
+
+
+
+;; How to use watch-ui:
+(comment
+  ;; Create a ref
+  (defonce state (atom []))
+
+  ;; Create the watch-ui. When working at the REPL use defonce to avoid adding multiple UIs/watchers to the ref.
+  (defonce ui (swing/watch-ui state))
+
+  ;; Swap new data into the atom (REPL workflow)
+  (reset! state '[1 2 3 "A" "B" "C" + - * /])
+  ;; Or just have it display your app's changing state (e.g. in an atom).
+  )
+
+
 
 ;; primitives currently not supported
 #_(swing/dsui 42)

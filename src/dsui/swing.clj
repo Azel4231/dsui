@@ -11,7 +11,7 @@
 (defn ^JFrame frame [title close-f]
   (doto (new JFrame)
     (.setSize (new java.awt.Dimension 800 800))
-    (.addWindowListener (proxy [WindowAdapter] [] (windowClosing [e] close-f)))
+    (.addWindowListener (proxy [WindowAdapter] [] (windowClosing [e] (close-f e))))
     (.setTitle title)
     (.setVisible true)))
 
@@ -123,11 +123,11 @@
 (defmethod create :dsui.core/nested-ds [[_ ds]]
   (create ds))
 
-(defn dsui-panel
+(defn dsui-content
   [ds]
   (create (s/conform :dsui.core/ds ds)))
 
-(defn- refresh [frm]
+(defn refresh [frm]
   (. SwingUtilities invokeLater (fn [] (. SwingUtilities updateComponentTreeUI frm))))
 
 (s/fdef dsui
@@ -135,10 +135,12 @@
         :ret any?)
 (defn dsui
   "Creates a read-only, form-based swing UI for an arbitrary nested data structure."
-  [ds]
-  (doto (frame "DS-UI" #(print "Exiting..."))
-    (.setContentPane (dsui-panel ds))
-    refresh)) 
+  ([ds]
+   (dsui ds #(print "Exiting..." %)))
+  ([ds close-f]
+   (doto (frame "DS-UI" close-f)
+     (.setContentPane (dsui-content ds))
+     refresh)))
 
 
 (defn conform-ui
@@ -148,3 +150,14 @@
     (if (= :clojure.spec.alpha/invalid conf)
       (dsui (s/explain-data spec data))
       (dsui conf))))
+
+
+(defn watch-ui
+  "Watches the ref and updates itself to mirror the ref's value whenever it changes."
+  [ref]
+  (let [frame (dsui @ref)]
+    (add-watch ref :dsui (fn [key ref old-data new-data]
+                         (doto frame
+                           (.setContentPane (dsui-content new-data))
+                           refresh)))))
+

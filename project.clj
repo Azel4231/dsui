@@ -1,4 +1,4 @@
-(defproject org.clojars.azel4231/dsui "0.1.0"
+(defproject org.clojars.azel4231/dsui "0.1.1"
   :description "Generate a readonly form-based UI for arbitrary data"
   :url "https://github.com/Azel4231/dsui"
   :license {:name "Eclipse Public License"
